@@ -14,7 +14,7 @@ public final class Lexer {
     private var pos: Int = 0
     
     public init(_ input: String) {
-        self.text = Array(input.replacingOccurrences(of: " ", with: ""))
+        self.text = Array(input)
     }
     
     private func currentChar() -> Character? {
@@ -23,6 +23,12 @@ public final class Lexer {
     
     private func advance() {
         pos += 1
+    }
+    
+    private func skipWhitespace() {
+        while let char = currentChar(), char.isWhitespace {
+            advance()
+        }
     }
     
     private func integer() -> Int {
@@ -35,25 +41,31 @@ public final class Lexer {
     }
     
     public func getNextToken() -> Token {
-        guard let char = currentChar() else {
-            return .eof
+        while let char = currentChar() {
+            
+            if char.isWhitespace {
+                skipWhitespace()
+                continue
+            }
+            
+            if char.isNumber {
+                return .number(integer())
+            }
+            
+            advance()
+            
+            switch char {
+            case "+": return .plus
+            case "-": return .minus
+            case "*": return .multiply
+            case "/": return .divide
+            case "(": return .lparen
+            case ")": return .rparen
+            default:
+                fatalError("Unknown character: \(char)")
+            }
         }
         
-        if char.isNumber {
-            return .number(integer())
-        }
-        
-        advance()
-        
-        switch char {
-        case "+": return .plus
-        case "-": return .minus
-        case "*": return .multiply
-        case "/": return .divide
-        case "(": return .lparen
-        case ")": return .rparen
-        default:
-            return .eof
-        }
+        return .eof
     }
 }
