@@ -8,22 +8,22 @@ public final class Parser {
     }
     
     private func eat(_ token: Token) {
-    switch (token, currentToken) {
-    case (.number, .number):
-        currentToken = lexer.getNextToken()
-        
-    case _ where token == currentToken:
-        currentToken = lexer.getNextToken()
-        
-    default:
-        fatalError("Invalid syntax")
+        switch (token, currentToken) {
+        case (.number, .number):
+            currentToken = lexer.getNextToken()
+            
+        case _ where token == currentToken:
+            currentToken = lexer.getNextToken()
+            
+        default:
+            fatalError("Invalid syntax: expected \(token), got \(currentToken)")
+        }
     }
-}
     
     private func factor() -> Int {
         switch currentToken {
         case .number(let value):
-            eat(currentToken)
+            eat(.number(value))
             return value
             
         case .lparen:
