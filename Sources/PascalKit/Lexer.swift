@@ -1,4 +1,4 @@
-public enum Token: Equatable {
+public enum Token {
     case number(Int)
     case plus
     case minus
