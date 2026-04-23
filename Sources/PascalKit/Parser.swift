@@ -23,7 +23,7 @@ public final class Parser {
     private func factor() -> Int {
         switch currentToken {
         case .number(let value):
-            eat(.number(value))
+            eat(.number(0)) // match any number safely
             return value
             
         case .lparen:
@@ -33,7 +33,7 @@ public final class Parser {
             return result
             
         default:
-            fatalError("Unexpected token")
+            fatalError("Unexpected token: \(currentToken)")
         }
     }
     
@@ -42,11 +42,12 @@ public final class Parser {
         
         while currentToken == .multiply || currentToken == .divide {
             let token = currentToken
-            eat(token)
             
             if token == .multiply {
+                eat(.multiply)
                 result *= factor()
             } else {
+                eat(.divide)
                 result /= factor()
             }
         }
@@ -59,11 +60,12 @@ public final class Parser {
         
         while currentToken == .plus || currentToken == .minus {
             let token = currentToken
-            eat(token)
             
             if token == .plus {
+                eat(.plus)
                 result += term()
             } else {
+                eat(.minus)
                 result -= term()
             }
         }
