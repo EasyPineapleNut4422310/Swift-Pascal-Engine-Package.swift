@@ -8,12 +8,17 @@ public final class Parser {
     }
     
     private func eat(_ token: Token) {
-        if case token = currentToken {
-            currentToken = lexer.getNextToken()
-        } else {
-            fatalError("Invalid syntax")
-        }
+    switch (token, currentToken) {
+    case (.number, .number):
+        currentToken = lexer.getNextToken()
+        
+    case _ where token == currentToken:
+        currentToken = lexer.getNextToken()
+        
+    default:
+        fatalError("Invalid syntax")
     }
+}
     
     private func factor() -> Int {
         switch currentToken {
