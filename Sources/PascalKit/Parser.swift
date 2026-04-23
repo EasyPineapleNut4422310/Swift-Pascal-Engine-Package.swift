@@ -7,24 +7,34 @@ public final class Parser {
         self.currentToken = lexer.getNextToken()
     }
     
-    private func eat(_ token: Token) {
-        switch (token, currentToken) {
-        case (.number, .number):
+    private func eatNumber() -> Int {
+        if case let .number(value) = currentToken {
             currentToken = lexer.getNextToken()
+            return value
+        }
+        fatalError("Expected number")
+    }
+    
+    private func eat(_ expected: Token) {
+        switch (expected, currentToken) {
+        case (.plus, .plus),
+             (.minus, .minus),
+             (.multiply, .multiply),
+             (.divide, .divide),
+             (.lparen, .lparen),
+             (.rparen, .rparen):
             
-        case _ where token == currentToken:
             currentToken = lexer.getNextToken()
             
         default:
-            fatalError("Invalid syntax: expected \(token), got \(currentToken)")
+            fatalError("Invalid syntax")
         }
     }
     
     private func factor() -> Int {
         switch currentToken {
-        case .number(let value):
-            eat(.number(0)) // match any number safely
-            return value
+        case .number:
+            return eatNumber()
             
         case .lparen:
             eat(.lparen)
@@ -33,47 +43,59 @@ public final class Parser {
             return result
             
         default:
-            fatalError("Unexpected token: \(currentToken)")
+            fatalError("Unexpected token")
         }
     }
     
     private func term() -> Int {
         var result = factor()
         
-        while currentToken == .multiply || currentToken == .divide {
-            let token = currentToken
-            
-            if token == .multiply {
+        while true {
+            switch currentToken {
+            case .multiply:
                 eat(.multiply)
                 result *= factor()
-            } else {
+                
+            case .divide:
                 eat(.divide)
                 result /= factor()
+                
+            default:
+                return result
             }
         }
-        
-        return result
     }
     
     private func expr() -> Int {
         var result = term()
         
-        while currentToken == .plus || currentToken == .minus {
-            let token = currentToken
-            
-            if token == .plus {
+        while true {
+            switch currentToken {
+            case .plus:
                 eat(.plus)
                 result += term()
-            } else {
+                
+            case .minus:
                 eat(.minus)
                 result -= term()
+                
+            default:
+                return result
             }
         }
-        
-        return result
     }
     
     public func parse() -> Int {
         return expr()
+    }
+}
+public final class PascalCompiler {
+    public init() {}
+    
+    public func run(_ source: String) -> String {
+        let lexer = Lexer(source)
+        let parser = Parser(lexer: lexer)
+        let result = parser.parse()
+        return "\(result)"
     }
 }
